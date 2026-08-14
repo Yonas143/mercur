@@ -6,7 +6,7 @@ session detail aggressively. The per-spec source of truth lives in
 
 ## Current Verified State
 
-- **Repository root**: `/Users/viktorholik/Desktop/mercur`
+- **Repository root**: `/Users/yonas/Desktop/Kebet/mercur`
 - **Current branch**: `main`
 - **Current version**: `2.2.0-rc.1`
 - **Standard startup path**: `bun install && bun run dev`
