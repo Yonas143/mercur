@@ -6,6 +6,6 @@ curl -fsSL https://bun.sh/install | bash
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 bun install
-bun run --filter '@mercurjs/storefront^' build
+bunx turbo run build --filter=@mercurjs/storefront^
 cd apps/storefront
 bunx next build

@@ -2,16 +2,17 @@
 set -euo pipefail
 
 APP="${1:?usage: render-vite.sh <admin-test|vendor>}"
-if [[ "$APP" != "admin-test" && "$APP" != "vendor" ]]; then
-  echo "APP must be admin-test or vendor" >&2
-  exit 1
-fi
+case "$APP" in
+  admin-test) FILTER="@acme/admin..." ;;
+  vendor)     FILTER="@acme/vendor..." ;;
+  *) echo "APP must be admin-test or vendor" >&2; exit 1 ;;
+esac
 
 export BUN_INSTALL="$HOME/.bun"
 curl -fsSL https://bun.sh/install | bash
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 bun install
-bun run --filter "@acme/${APP}..." build
-cd "apps/${APP}"
+bunx turbo run build --filter="$FILTER"
+cd "apps/$APP"
 bunx vite build
