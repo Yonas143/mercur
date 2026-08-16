@@ -3,12 +3,12 @@ import { withMercur } from '@mercurjs/core'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+const REDIS_URL = process.env.REDIS_URL
 
 module.exports = withMercur({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
-    redisUrl: REDIS_URL,
+    ...(REDIS_URL ? { redisUrl: REDIS_URL } : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -38,31 +38,58 @@ module.exports = withMercur({
         disable: true
       }
     },
-    {
-      resolve: '@medusajs/medusa/cache-redis',
-      options: { redisUrl: REDIS_URL },
-    },
-    {
-      resolve: '@medusajs/medusa/event-bus-redis',
-      options: { redisUrl: REDIS_URL },
-    },
-    {
-      resolve: '@medusajs/medusa/workflow-engine-redis',
-      options: { redis: { url: REDIS_URL } },
-    },
-    {
-      resolve: '@medusajs/medusa/locking',
-      options: {
-        providers: [
+    ...(REDIS_URL
+      ? [
           {
-            resolve: '@medusajs/medusa/locking-redis',
-            id: 'locking-redis',
-            is_default: true,
+            resolve: '@medusajs/medusa/cache-redis',
             options: { redisUrl: REDIS_URL },
           },
-        ],
-      },
-    },
+          {
+            resolve: '@medusajs/medusa/event-bus-redis',
+            options: { redisUrl: REDIS_URL },
+          },
+          {
+            resolve: '@medusajs/medusa/workflow-engine-redis',
+            options: { redis: { url: REDIS_URL } },
+          },
+          {
+            resolve: '@medusajs/medusa/locking',
+            options: {
+              providers: [
+                {
+                  resolve: '@medusajs/medusa/locking-redis',
+                  id: 'locking-redis',
+                  is_default: true,
+                  options: { redisUrl: REDIS_URL },
+                },
+              ],
+            },
+          },
+        ]
+      : [
+          {
+            resolve: '@medusajs/medusa/cache-inmemory',
+          },
+          {
+            resolve: '@medusajs/medusa/event-bus-local',
+          },
+          {
+            resolve: '@medusajs/medusa/workflow-engine-inmemory',
+          },
+          {
+            resolve: '@medusajs/medusa/locking',
+            options: {
+              providers: [
+                {
+                  resolve: '@medusajs/medusa/locking-postgres',
+                  id: 'locking-postgres',
+                  is_default: true,
+                  options: { databaseUrl: process.env.DATABASE_URL },
+                },
+              ],
+            },
+          },
+        ]),
     {
       resolve: '@medusajs/medusa/file',
       options: {
